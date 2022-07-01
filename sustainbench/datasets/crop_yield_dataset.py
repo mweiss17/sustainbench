@@ -54,7 +54,7 @@ class CropYieldDataset(SustainBenchDataset):
     _dataset_name = 'crop_yield'
     _versions_dict = { #TODO
         '1.0': {
-            'download_url': None,
+            'download_url': 'https://drive.google.com/drive/folders/1hsp2PlXAgcQ0pbx_vvPKHZcj_Am3rWx4?usp=sharing',
             'compressed_size': None
         }
     }

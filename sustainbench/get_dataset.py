@@ -35,6 +35,10 @@ def get_dataset(dataset, version=None, **dataset_kwargs):
         from sustainbench.datasets.croptypemapping_dataset import CropTypeMappingDataset
         return CropTypeMappingDataset(version=version, **dataset_kwargs)
 
+    elif dataset == 'crop_type_kenya':
+        from sustainbench.datasets.croptypemapping_kenya import CropTypeMappingKenyaDataset
+        return CropTypeMappingKenyaDataset(version=version, **dataset_kwargs)
+
     elif dataset == 'crop_seg':
         if version == '1.0':
             from sustainbench.datasets.archive.crop_seg_v1_0_dataset import CropSegmentationDataset
