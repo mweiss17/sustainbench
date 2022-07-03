@@ -50,3 +50,7 @@ def get_dataset(dataset, version=None, **dataset_kwargs):
         from sustainbench.datasets.brickkiln_dataset import BrickKilnDataset
         return BrickKilnDataset(version=version, **dataset_kwargs)
 
+    elif dataset == 'education':
+        from sustainbench.datasets.women_edu_dataset import FemaleEducationalAchievementDataset
+        return FemaleEducationalAchievementDataset(version=version, **dataset_kwargs)
+

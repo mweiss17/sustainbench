@@ -3,7 +3,7 @@ import os
 import sys
 
 here = os.path.abspath(os.path.dirname(__file__))
-sys.path.insert(0, os.path.join(here, 'SustainBench'))
+sys.path.insert(0, os.path.join(here, 'sustainbench'))
 from version import __version__
 
 print(f'Version {__version__}')
@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="SustainBench",
+    name="sustainbench",
     version=__version__,
     author="SustainLab",
     author_email="temp@cs.stanford.edu", 

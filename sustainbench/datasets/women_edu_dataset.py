@@ -1,5 +1,6 @@
 from pathlib import Path
 import pickle
+import os 
 
 import numpy as np
 import pandas as pd
@@ -26,13 +27,15 @@ SPLITS = {
         'AM', 'AO', 'BU', 'CI', 'EG', 'ET', 'KH', 'KY', 'ML', 'NP', 'PK', 'RW',
         'SZ']
 }
-
+DHS_COUNTRY_CODES = ['AL', 'BD', 'CD', 'CM', 'GH', 'GU', 'HN', 'IA', 'ID', 'JO', 'KE', 'KM',
+        'LB', 'LS', 'MA', 'MB', 'MD', 'MM', 'MW', 'MZ', 'NG', 'NI', 'PE', 'PH',
+        'SN', 'TG', 'TJ', 'UG', 'ZM', 'ZW', 'BF', 'BJ', 'BO', 'CO', 'DR', 'GA', 'GN', 'GY', 'HT', 'NM', 'SL', 'TD','TZ', 'AM', 'AO', 'BU', 'CI', 'EG', 'ET', 'KH', 'KY', 'ML', 'NP', 'PK', 'RW',
+        'SZ']
 DHS_COUNTRIES = [
     'angola', 'benin', 'burkina_faso', 'cameroon', 'cote_d_ivoire',
     'democratic_republic_of_congo', 'ethiopia', 'ghana', 'guinea', 'kenya',
     'lesotho', 'malawi', 'mali', 'mozambique', 'nigeria', 'rwanda', 'senegal',
     'sierra_leone', 'tanzania', 'togo', 'uganda', 'zambia', 'zimbabwe']
-
 
 # means and standard deviations are calculated over the entire dataset (train + val + test)
 
@@ -69,7 +72,7 @@ def split_by_countries(idxs, ood_countries, metadata):
     return idxs[~is_ood], idxs[is_ood]
 
 
-class PovertyMapDataset(SustainBenchDataset):
+class FemaleEducationalAchievementDataset(SustainBenchDataset):
     """The PovertyMap poverty measure prediction dataset.
 
     This is a processed version of LandSat 5/7/8 Surface Reflectance,
@@ -125,7 +128,7 @@ class PovertyMapDataset(SustainBenchDataset):
     License:
         LandSat/DMSP/VIIRS data is U.S. Public Domain.
     """
-    _dataset_name = 'poverty'
+    _dataset_name = 'education'
     _versions_dict = {
         '1.0': {
             'download_urls': [
@@ -145,7 +148,6 @@ class PovertyMapDataset(SustainBenchDataset):
                  'size':     19_356_345}
             ]
         },
-        '1.1': {'download_url': None}
     }
 
     def __init__(self, version=None, root_dir='data', download=False,
@@ -154,9 +156,8 @@ class PovertyMapDataset(SustainBenchDataset):
                  use_ood_val=True,
                  cache_size=100):
         self._version = version
-        self._data_dir = self.initialize_data_dir(root_dir, download)
-        # While the daytime image bands have a native 30m/pixel resolution, the nightlights images have a lower native resolution and are upsampled using the nearest-neighbors algorithm to match the daytime image resolution
-        self.resolution = 30.
+        self._data_dir = self.initialize_data_dir(root_dir, download, data_dir="dhs_dataset_v1.0")
+
         self._split_dict = {'train': 0, 'id_val': 1, 'id_test': 2, 'val': 3, 'test': 4}
         self._split_names = {'train': 'Train', 'id_val': 'ID Val', 'id_test': 'ID Test', 'val': 'OOD Val', 'test': 'OOD Test'}
 
@@ -173,8 +174,8 @@ class PovertyMapDataset(SustainBenchDataset):
             raise ValueError("Fold must be A, B, C, D, or E")
 
         self.root = Path(self._data_dir)
-        self.metadata = pd.read_csv(self.root / 'dhs_metadata.csv')
-        self.metadata.rename(columns={"urban_rural": "urban"}, inplace=True)
+        self.metadata = pd.read_csv(self.root / 'dhs_final_labels.csv')
+        self.metadata.rename(columns={"cname": "country"}, inplace=True)
         # country folds, split off OOD
         country_folds = SPLITS
 
@@ -215,20 +216,15 @@ class PovertyMapDataset(SustainBenchDataset):
             self._split_dict = {'train': 0, 'val': 1, 'id_test': 2, 'ood_val': 3, 'test': 4}
             self._split_names = {'train': 'Train', 'val': 'ID Val', 'id_test': 'ID Test', 'ood_val': 'OOD Val', 'test': 'OOD Test'}
 
-        self._y_array = torch.from_numpy(np.asarray(self.metadata['wealthpooled'])[:, np.newaxis]).float()
+        self._y_array = torch.from_numpy(np.asarray(self.metadata['women_edu'])[:, np.newaxis]).float()
         self._y_size = 1
 
         # add country group field
-        country_to_idx = {country: i for i, country in enumerate(DHS_COUNTRIES)}
+        country_to_idx = {country: i for i, country in enumerate(DHS_COUNTRY_CODES)}
         self.metadata['country'] = [country_to_idx[country] for country in self.metadata['country'].tolist()]
-        self._metadata_map = {'country': DHS_COUNTRIES}
-        self._metadata_array = torch.from_numpy(self.metadata[['urban', 'wealthpooled', 'country', 'lat', 'lon']].astype(float).to_numpy())
-        # rename wealthpooled to y
-        self._metadata_fields = ['urban', 'y', 'country', 'lat', 'lon']
-
-        self._eval_grouper = CombinatorialGrouper(
-            dataset=self,
-            groupby_fields=['urban'])
+        self._metadata_map = {'country': DHS_COUNTRY_CODES}
+        self._metadata_array = torch.from_numpy(self.metadata[['women_edu', 'country']].astype(float).to_numpy())
+        self._metadata_fields = ['y', 'country']
 
         super().__init__(root_dir, download, split_scheme)
 
@@ -236,7 +232,10 @@ class PovertyMapDataset(SustainBenchDataset):
         """
         Returns x for a given idx.
         """
-        img = np.load(self.root / 'images' / f'landsat_poverty_img_{idx}.npz')['x']
+        s = self.metadata["DHSID_EA"][idx]
+        d = "-".join(s.split("-")[:-1])
+        fname = os.path.join(d, s[-8:])
+        img = np.load(self.root / d / f"{s}.npz")['x']
         if self.no_nl:
             img[-1] = 0
         img = torch.from_numpy(img).float()

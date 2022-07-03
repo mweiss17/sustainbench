@@ -169,6 +169,7 @@ class FMoWDataset(SustainBenchDataset):
         """
         idx = self.full_idxs[idx]
         img = Image.open(self.root / 'images' / f'rgb_img_{idx}.png').convert('RGB')
+        img = torch.from_numpy(np.array(img))
         return img
 
     def eval(self, y_pred, y_true, metadata, prediction_fn=None):

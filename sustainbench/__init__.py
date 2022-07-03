@@ -3,9 +3,11 @@ from .get_dataset import get_dataset
 
 benchmark_datasets = [
     'poverty',
+    'poverty_change_dataset',
     'fmow',
     'africa_crop_type_mapping',
     'crop_seg',
+    'education',
 ]
 
 additional_datasets = [

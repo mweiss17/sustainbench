@@ -49,8 +49,7 @@ class CropSegmentationDataset(SustainBenchDataset):
 
     def __init__(self, version=None, root_dir='data', download=False, split_scheme='official', oracle_training_set=False, seed=111, filled_mask=False, use_ood_val=False):
         self._version = version
-        self._data_dir = "/atlas/u/chenlin/dataset_benchmark_private/hanBurakData/sentinel_jul_sept_v2" # TODO: implementation only
-        #self._data_dir = self.initialize_data_dir(root_dir, download) # TODO: uncomment
+        self._data_dir = self.initialize_data_dir(root_dir, download) 
 
         self._split_dict = {'train': 0, 'val': 1, 'test': 2}
         self._split_names = {'train': 'Train', 'val': 'Val', 'test': 'Test'}
@@ -84,8 +83,8 @@ class CropSegmentationDataset(SustainBenchDataset):
         else:
             self._y_array = np.asarray([self.root / 'masks' / f'{y}.png' for y in self.full_idxs])
 
-        self.metadata['y'] = self._y_array
         self._y_size = 1
+        self.metadata.rename(columns={"ids": "y"}, inplace=True)
 
         self._metadata_fields = ['y', 'max_lat', 'max_lon', 'min_lat', 'min_lon']
         self._metadata_array = self.metadata[self._metadata_fields].to_numpy()
@@ -106,6 +105,7 @@ class CropSegmentationDataset(SustainBenchDataset):
         """
         idx = self.full_idxs[idx]
         img = Image.open(self.root / 'imgs' / f'{idx}.jpeg').convert('RGB')
+        img = torch.from_numpy(np.array(img))
         return img
 
     def get_output_image(self, path):
@@ -113,6 +113,7 @@ class CropSegmentationDataset(SustainBenchDataset):
         Returns x for a given idx.
         """
         img = Image.open(path).convert('RGB')
+        img = torch.from_numpy(np.array(img))
         return img
 
     def crop_segmentation_metrics(self, y_true, y_pred, binarized=True):
