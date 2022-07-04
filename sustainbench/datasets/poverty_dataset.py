@@ -148,6 +148,7 @@ class PovertyMapDataset(SustainBenchDataset):
         '1.1': {'download_url': None}
     }
 
+
     def __init__(self, version=None, root_dir='data', download=False,
                  split_scheme='official',
                  no_nl=False, fold='A', oracle_training_set=False,

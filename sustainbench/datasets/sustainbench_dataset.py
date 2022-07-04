@@ -16,6 +16,8 @@ class SustainBenchDataset:
     """
     DEFAULT_SPLITS = {'train': 0, 'val': 1, 'test': 2}
     DEFAULT_SPLIT_NAMES = {'train': 'Train', 'val': 'Validation', 'test': 'Test'}
+    # ADD TO THIS as more dataloaders are written or as more data is added to the drive folder
+    GOOGLE_DRIVE_DATASETS = {'poverty', 'africa_crop_type_mapping', 'crop_type_kenya', 'crop_yield', 'brick_kiln'}
 
     def __init__(self, root_dir, download, split_scheme):
         if len(self._metadata_array.shape) == 1:
@@ -44,9 +46,9 @@ class SustainBenchDataset:
         Output:
             - x (Tensor): Input features of the idx-th data point
         """
-        raise NotImplementedError
+        return self.dataset[self.indices[idx]]
 
-    def eval(self, y_pred, y_true, metadata):
+    #def eval(self, y_pred, y_true, metadata):
         """
         Args:
             - y_pred (Tensor): Predicted targets
@@ -56,7 +58,7 @@ class SustainBenchDataset:
             - results (dict): Dictionary of results
             - results_str (str): Pretty print version of the results
         """
-        raise NotImplementedError
+    #    raise NotImplementedError
 
     def get_subset(self, split, frac=1.0, transform=None):
         """
@@ -295,9 +297,6 @@ class SustainBenchDataset:
         Datasets for which we don't control the download, like Yelp,
         might not handle versions similarly.
         """
-        if self.version not in self.versions_dict:
-            raise ValueError(f'Version {self.version} not supported. Must be in {self.versions_dict.keys()}.')
-        
         if self.versions_dict[self.version].get('download_urls') is not None:
             download_urls = [x["url"] for x in self.versions_dict[self.version].get('download_urls')]
         else:
@@ -358,6 +357,14 @@ class SustainBenchDataset:
             from sustainbench.datasets.download_utils import download_and_extract_archive
             print(f'Downloading dataset to {data_dir}...')
             print(f'You can also download the dataset manually at https://wilds.stanford.edu/downloads.')
+
+        import gdown  
+        print(f'Downloading dataset to {data_dir}...')
+        
+        # download WILDS data
+        if self.dataset_name not in self.GOOGLE_DRIVE_DATASETS:
+            print(f'You can also download the dataset manually at https://wilds.stanford.edu/downloads.')
+            compressed_size = self.versions_dict[self.version]['compressed_size']
             try:
                 start_time = time.time()
                 download_and_extract_archive(
@@ -371,7 +378,31 @@ class SustainBenchDataset:
             except Exception as e:
                 print(f"\n{os.path.join(data_dir, 'archive.tar.gz')} may be corrupted. Please try deleting it and rerunning this command.\n")
                 print(f"Exception: ", e)
-
+        # DHS data
+        elif self.dataset_name == 'poverty':
+            print(f'Downloading from Google Drive...')
+            #for google_drive_dict in download_url:
+            #    url = google_drive_dict['url']
+            #    compressed_size = google_drive_dict['size']
+            #    gdown.download_folder(url, quiet=True, use_cookies=False)
+            try: 
+                gdown.download_folder(download_url, quiet=True, use_cookies=False)
+            except Exception as e:
+                print(f"\n{os.path.join(data_dir, 'archive.tar.gz')} may be corrupted. Please try deleting it and rerunning this command.\n")
+                print(f"Exception: ", e)
+        
+        # download from Google drive
+        else:
+            print(f'Downloading from Google Drive...')
+            #for google_drive_dict in download_url:
+            #    url = google_drive_dict['url']
+            #    compressed_size = google_drive_dict['size']
+            #    gdown.download_folder(url, quiet=True, use_cookies=False)
+            try: 
+                gdown.download_folder(download_url, quiet=True, use_cookies=False)
+            except Exception as e:
+                print(f"\n{os.path.join(data_dir, 'archive.tar.gz')} may be corrupted. Please try deleting it and rerunning this command.\n")
+                print(f"Exception: ", e)
         return data_dir
 
     @staticmethod

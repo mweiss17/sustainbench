@@ -97,7 +97,7 @@ class CropTypeMappingDataset(SustainBenchDataset):
     _dataset_name = 'africa_crop_type_mapping'
     _versions_dict = { # TODO
         '1.0': {
-            'download_url': None,
+            'download_url': 'https://drive.google.com/drive/folders/1WhVObtFOzYFiXBsbbrEGy1DUtv7ov7wF?usp=sharing',
             'compressed_size': None}}
 
     def __init__(self, version=None, root_dir='data', download=False, split_scheme='official', 

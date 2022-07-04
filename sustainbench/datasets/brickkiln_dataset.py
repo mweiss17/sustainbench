@@ -35,7 +35,7 @@ class BrickKilnDataset(SustainBenchDataset):
     _dataset_name = 'brick_kiln'
     _versions_dict = { # TODO
         '1.0': {
-            'download_url': None,
+            'download_url': 'https://drive.google.com/drive/folders/1VvDQHTorD8sa6YJ6_Z9UoEFGu7QpR2dT?usp=sharing',
             'compressed_size': None}}
 
     def __init__(self, version=None, root_dir='data', download=False, split_scheme='official'):

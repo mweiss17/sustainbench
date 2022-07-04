@@ -54,19 +54,18 @@ class CropYieldDataset(SustainBenchDataset):
     _dataset_name = 'crop_yield'
     _versions_dict = { #TODO
         '1.0': {
-            'download_url': None,
+            'download_url': 'https://drive.google.com/drive/folders/1hsp2PlXAgcQ0pbx_vvPKHZcj_Am3rWx4?usp=sharing',
             'compressed_size': None
         }
     }
 
     def __init__(self, version=None, root_dir='data', download=False, split_scheme='official', seed=111, filled_mask=False):
         self._version = version
-        self._data_dir = "/atlas/u/pliu1/deep-transfer-learning-crop-prediction/datasets" # TODO: implementation only
-        # self._data_dir = self.initialize_data_dir(root_dir, download) # TODO: uncomment
+        self._data_dir = self.initialize_data_dir(root_dir, download) 
         
         self.root = Path(self._data_dir)
         self.seed = int(seed)
-        self._original_resolution = (32, 32) #checked
+        self._original_resolution = (32, 32)
         
         self._split_dict = {'train': 0, 'val': 1, 'test': 2}
         self._split_names = {'train': 'Train', 'val': 'Val', 'test': 'Test'}

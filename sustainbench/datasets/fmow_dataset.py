@@ -10,6 +10,7 @@ from torchvision import transforms
 import tarfile
 import datetime
 import pytz
+import torch.nn.functional as functional
 from PIL import Image
 from tqdm import tqdm
 from sustainbench.common.utils import subsample_idxs
@@ -130,11 +131,15 @@ class FMoWDataset(SustainBenchDataset):
         self._split_array = self._split_array[~seq_mask]
         self.full_idxs = np.arange(len(self.metadata))[~seq_mask]
 
+        self._y_size = 1
+        self._n_classes = 62
+
         self._y_array = np.asarray([self.category_to_idx[y] for y in list(self.metadata['category'])])
         self.metadata['y'] = self._y_array
         self._y_array = torch.from_numpy(self._y_array).long()[~seq_mask]
-        self._y_size = 1
-        self._n_classes = 62
+        if self._y_array.dtype == torch.int64:
+            self._y_array = functional.one_hot(self._y_array, num_classes=self._n_classes).float()
+
 
         # convert region to idxs
         all_regions = list(self.metadata['region'].unique())
