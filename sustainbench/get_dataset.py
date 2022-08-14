@@ -58,7 +58,7 @@ def get_dataset(dataset, version=None, **dataset_kwargs):
         from sustainbench.datasets.women_edu_dataset import FemaleEducationalAchievementDataset
         return FemaleEducationalAchievementDataset(version=version, **dataset_kwargs)
 
-    elif dataset == 'weak_cropland':
-        from sustainbench.datasets.weak_cropland import WeakCroplandDataset
-        return WeakCroplandDataset(version=version, **dataset_kwargs)
+    elif dataset == 'land_cover_rep':
+        from sustainbench.datasets.land_cover_rep_dataset import LandCoverRepDataset
+        return LandCoverRepDataset(version=version, **dataset_kwargs)
 

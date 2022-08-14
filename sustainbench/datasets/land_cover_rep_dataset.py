@@ -21,6 +21,7 @@ from datetime import datetime
 from benchy.datasets import TypeNames as T
 import einops as eo
 import pandas as pd
+from sustainbench.datasets.sustainbench_dataset import SustainBenchDataset
 
 import os
 import pandas as pd
@@ -33,7 +34,7 @@ IMG_DIM = 100
 NUM_CLASSES = 61
 BANDS = 4
 
-class LandCoverRepDataset(Dataset):
+class LandCoverRepDataset(SustainBenchDataset):
     """
     The Land Cover Representation dataset.
     Imagery is from the USDA's National Agriculture Imagery Program (NAIP), which provides aerial imagery for public
@@ -65,9 +66,8 @@ class LandCoverRepDataset(Dataset):
         Distributed under the SustainBench MIT License.
         https://github.com/sustainlab-group/sustainbench/blob/main/LICENSE
     """
-    _dataset_name = 'land_cover_representation'
+    _dataset_name = 'land_cover_rep'
     def __init__(self, root_dir, split="train", **dataset_kwargs):
-        breakpoint()
         root = self.root = os.path.expanduser(root_dir)
         self._data_dir = self.initialize_data_dir(root, download)
         self._tile_dir = os.path.join(self._data_dir, 'tile_triplets')
