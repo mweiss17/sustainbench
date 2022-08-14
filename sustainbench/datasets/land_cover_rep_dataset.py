@@ -67,9 +67,15 @@ class LandCoverRepDataset(SustainBenchDataset):
         https://github.com/sustainlab-group/sustainbench/blob/main/LICENSE
     """
     _dataset_name = 'land_cover_rep'
-    def __init__(self, root_dir, split="train", **dataset_kwargs):
+    _versions_dict = {
+        '1.0': {'download_url': None},
+        '1.1': {'download_url': None}
+    }
+
+    def __init__(self, root_dir, version="1.1", split="train", **dataset_kwargs):
+        self._version = version
         root = self.root = os.path.expanduser(root_dir)
-        self._data_dir = self.initialize_data_dir(root, download)
+        self._data_dir = self.initialize_data_dir(root, download=False)
         self._tile_dir = os.path.join(self._data_dir, 'tile_triplets')
         self._metadata_fields = ['fileName', 'landCover', 'split', 'splitStr']
         self._metadata_array = pd.read_csv(os.path.join(self.data_dir, 'metadata.csv'))
