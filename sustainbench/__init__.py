@@ -10,7 +10,7 @@ benchmark_datasets = [
     'education',
     'crop_type_kenya',
     'crop_yield',
-    'weak_cropland',
+    'land_cover_rep',
     'brick_kiln'
 ]
 
