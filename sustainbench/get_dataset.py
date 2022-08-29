@@ -54,11 +54,11 @@ def get_dataset(dataset, version=None, **dataset_kwargs):
         from sustainbench.datasets.brickkiln_dataset import BrickKilnDataset
         return BrickKilnDataset(version=version, **dataset_kwargs)
 
-    elif dataset == 'education':
-        from sustainbench.datasets.women_edu_dataset import FemaleEducationalAchievementDataset
-        return FemaleEducationalAchievementDataset(version=version, **dataset_kwargs)
-
     elif dataset == 'land_cover_rep':
         from sustainbench.datasets.land_cover_rep_dataset import LandCoverRepDataset
         return LandCoverRepDataset(version=version, **dataset_kwargs)
+
+    elif dataset == 'dhs_dataset':
+        from sustainbench.datasets.dhs_dataset import DHSDataset
+        return DHSDataset(version=version, **dataset_kwargs)
 

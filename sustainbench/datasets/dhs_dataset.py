@@ -1,5 +1,6 @@
 from pathlib import Path
 import pickle
+import os 
 
 import numpy as np
 import pandas as pd
@@ -26,6 +27,15 @@ SPLITS = {
         'AM', 'AO', 'BU', 'CI', 'EG', 'ET', 'KH', 'KY', 'ML', 'NP', 'PK', 'RW',
         'SZ']
 }
+DHS_COUNTRY_CODES = ['AL', 'BD', 'CD', 'CM', 'GH', 'GU', 'HN', 'IA', 'ID', 'JO', 'KE', 'KM',
+        'LB', 'LS', 'MA', 'MB', 'MD', 'MM', 'MW', 'MZ', 'NG', 'NI', 'PE', 'PH',
+        'SN', 'TG', 'TJ', 'UG', 'ZM', 'ZW', 'BF', 'BJ', 'BO', 'CO', 'DR', 'GA', 'GN', 'GY', 'HT', 'NM', 'SL', 'TD','TZ', 'AM', 'AO', 'BU', 'CI', 'EG', 'ET', 'KH', 'KY', 'ML', 'NP', 'PK', 'RW',
+        'SZ']
+DHS_COUNTRIES = [
+    'angola', 'benin', 'burkina_faso', 'cameroon', 'cote_d_ivoire',
+    'democratic_republic_of_congo', 'ethiopia', 'ghana', 'guinea', 'kenya',
+    'lesotho', 'malawi', 'mali', 'mozambique', 'nigeria', 'rwanda', 'senegal',
+    'sierra_leone', 'tanzania', 'togo', 'uganda', 'zambia', 'zimbabwe']
 
 # means and standard deviations are calculated over the entire dataset (train + val + test)
 
@@ -63,7 +73,7 @@ def split_by_countries(idxs, ood_countries, metadata):
 
 
 class DHSDataset(SustainBenchDataset):
-    """The DHS measure prediction dataset.
+    """The PovertyMap poverty measure prediction dataset.
 
     This is a processed version of LandSat 5/7/8 Surface Reflectance,
     DMSP-OLS, and VIIRS Nightlights satellite imagery originally
@@ -95,6 +105,8 @@ class DHSDataset(SustainBenchDataset):
         Each image is annotated with location coordinates (lat/lon, noised for
         anonymity), survey year, urban/rural classification, country.
 
+    Website: https://github.com/sustainlab-group/africa_poverty
+
     Original publication:
     @article{yeh2020using,
         author = {Yeh, Christopher and Perez, Anthony and Driscoll, Anne and
@@ -116,30 +128,26 @@ class DHSDataset(SustainBenchDataset):
     License:
         LandSat/DMSP/VIIRS data is U.S. Public Domain.
     """
-    _dataset_name = 'dhs_dataset'
+    _dataset_name = 'education'
     _versions_dict = {
-        #'1.0': {   
-        #    'download_urls': {
-        #        {'url': 'dhs_AL_DR.tar.gz',
-        #         'size': 16_472_693_417},
-        #        {'url': 'dhs_EG_HT.tar.gz',
-        #         'size': 13_579_206_686},
-        #        {'url': 'dhs_IA_IA.tar.gz',
-        #         'size': 24_046_259_399},
-        #        {'url': 'dhs_ID_MZ.tar.gz',
-        #         'size': 18_386_761_224},
-        #        {'url': 'dhs_NG_SZ.tar.gz',
-        #         'size': 18_911_963_362},
-        #        {'url': 'dhs_TD_ZW.tar.gz',
-        #         'size':  9_024_655_370},
-        #        {'url': 'dhs_final_labels.csv',
-        #         'size':     19_356_345}
-        #    }
-        #},
-        '1.1': {
-            'download_url': 'https://drive.google.com/drive/folders/1tzWDfd4Y5MvJnJb-lHieOuD-aVcUqzcu?usp=sharing',
-            'compressed_size': None
-        }
+        '1.0': {
+            'download_urls': [
+                {'url': 'dhs_AL_DR.tar.gz',
+                 'size': 16_472_693_417},
+                {'url': 'dhs_EG_HT.tar.gz',
+                 'size': 13_579_206_686},
+                {'url': 'dhs_IA_IA.tar.gz',
+                 'size': 24_046_259_399},
+                {'url': 'dhs_ID_MZ.tar.gz',
+                 'size': 18_386_761_224},
+                {'url': 'dhs_NG_SZ.tar.gz',
+                 'size': 18_911_963_362},
+                {'url': 'dhs_TD_ZW.tar.gz',
+                 'size':  9_024_655_370},
+                {'url': 'dhs_final_labels.csv',
+                 'size':     19_356_345}
+            ]
+        },
     }
 
     def __init__(self, version=None, root_dir='data', download=False,
@@ -148,7 +156,7 @@ class DHSDataset(SustainBenchDataset):
                  use_ood_val=True,
                  cache_size=100):
         self._version = version
-        self._data_dir = self.initialize_data_dir(root_dir, download)
+        self._data_dir = self.initialize_data_dir(root_dir, download, data_dir="dhs_dataset_v1.1")
 
         self._split_dict = {'train': 0, 'id_val': 1, 'id_test': 2, 'val': 3, 'test': 4}
         self._split_names = {'train': 'Train', 'id_val': 'ID Val', 'id_test': 'ID Test', 'val': 'OOD Val', 'test': 'OOD Test'}
@@ -166,9 +174,10 @@ class DHSDataset(SustainBenchDataset):
             raise ValueError("Fold must be A, B, C, D, or E")
 
         self.root = Path(self._data_dir)
-        self.metadata = pd.read_csv(self.root / 'dhs_metadata.csv')
+        self.metadata = pd.read_csv(self.root / 'dhs_final_labels.csv')
+        self.metadata.rename(columns={"cname": "country"}, inplace=True)
         # country folds, split off OOD
-        country_folds = SURVEY_NAMES[f'2009-17{fold}']
+        country_folds = SPLITS
 
         self._split_array = -1 * np.ones(len(self.metadata))
 
@@ -206,21 +215,16 @@ class DHSDataset(SustainBenchDataset):
         if not use_ood_val:
             self._split_dict = {'train': 0, 'val': 1, 'id_test': 2, 'ood_val': 3, 'test': 4}
             self._split_names = {'train': 'Train', 'val': 'ID Val', 'id_test': 'ID Test', 'ood_val': 'OOD Val', 'test': 'OOD Test'}
-
-        self._y_array = torch.from_numpy(np.asarray(self.metadata['wealthpooled'])[:, np.newaxis]).float()
-        self._y_size = 1
+        meta_array = np.nan_to_num(np.asarray(self.metadata[['water_index', 'sanitation_index', 'under5_mort', 'women_bmi', 'women_edu']])[:, np.newaxis], nan=-1.)
+        self._y_array = torch.from_numpy(meta_array).float()
+        self._y_size = 5
 
         # add country group field
-        country_to_idx = {country: i for i, country in enumerate(DHS_COUNTRIES)}
+        country_to_idx = {country: i for i, country in enumerate(DHS_COUNTRY_CODES)}
         self.metadata['country'] = [country_to_idx[country] for country in self.metadata['country'].tolist()]
-        self._metadata_map = {'country': DHS_COUNTRIES}
-        self._metadata_array = torch.from_numpy(self.metadata[['urban', 'wealthpooled', 'country']].astype(float).to_numpy())
-        # rename wealthpooled to y
-        self._metadata_fields = ['urban', 'y', 'country']
-
-        self._eval_grouper = CombinatorialGrouper(
-            dataset=self,
-            groupby_fields=['urban'])
+        self._metadata_map = {'country': DHS_COUNTRY_CODES}
+        self._metadata_fields = ['lat', 'lon', 'year', 'urban', 'country']
+        self._metadata_array = np.array(self.metadata[self._metadata_fields])
 
         super().__init__(root_dir, download, split_scheme)
 
@@ -228,11 +232,13 @@ class DHSDataset(SustainBenchDataset):
         """
         Returns x for a given idx.
         """
-        img = np.load(self.root / 'images' / f'landsat_poverty_img_{idx}.npz')['x']
+        s = self.metadata["DHSID_EA"][idx]
+        d = "-".join(s.split("-")[:-1])
+        fname = os.path.join(d, s[-8:])
+        img = np.load(self.root / d / f"{s}.npz")['x']
         if self.no_nl:
             img[-1] = 0
         img = torch.from_numpy(img).float()
-
         return img
 
     def eval(self, y_pred, y_true, metadata, prediction_fn=None):
@@ -247,7 +253,7 @@ class DHSDataset(SustainBenchDataset):
             - results (dictionary): Dictionary of evaluation metrics
             - results_str (str): String summarizing the evaluation metrics
         """
-        assert prediction_fn is None, "DHSDataset.eval() does not support prediction_fn"
+        assert prediction_fn is None, "PovertyMapDataset.eval() does not support prediction_fn"
 
         metrics = [MSE(), PearsonCorrelation()]
 

@@ -149,36 +149,3 @@ class CropSegmentationDataset(SustainBenchDataset):
         results = [f1, acc, precision_recall]
         results_str = 'Dice/ F1 score: {}, Accuracy score: {}, Precision recall fscore: '.format(f1, acc, precision_recall)
         return results, results_str
-
-        # metric = Accuracy(prediction_fn=prediction_fn)
-        # # Overall evaluation + evaluate by year
-        # all_results, all_results_str = self.standard_group_eval(
-        #     metric,
-        #     self._eval_groupers['year'],
-        #     y_pred, y_true, metadata)
-        # # Evaluate by region and ignore the "Other" region
-        # region_grouper = self._eval_groupers['region']
-        # region_results = metric.compute_group_wise(
-        #     y_pred,
-        #     y_true,
-        #     region_grouper.metadata_to_group(metadata),
-        #     region_grouper.n_groups)
-        # all_results[f'{metric.name}_worst_year'] = all_results.pop(metric.worst_group_metric_field)
-        # region_metric_list = []
-        # for group_idx in range(region_grouper.n_groups):
-        #     group_str = region_grouper.group_field_str(group_idx)
-        #     group_metric = region_results[metric.group_metric_field(group_idx)]
-        #     group_counts = region_results[metric.group_count_field(group_idx)]
-        #     all_results[f'{metric.name}_{group_str}'] = group_metric
-        #     all_results[f'count_{group_str}'] = group_counts
-        #     if region_results[metric.group_count_field(group_idx)] == 0 or "Other" in group_str:
-        #         continue
-        #     all_results_str += (
-        #         f'  {region_grouper.group_str(group_idx)}  '
-        #         f"[n = {region_results[metric.group_count_field(group_idx)]:6.0f}]:\t"
-        #         f"{metric.name} = {region_results[metric.group_metric_field(group_idx)]:5.3f}\n")
-        #     region_metric_list.append(region_results[metric.group_metric_field(group_idx)])
-        # all_results[f'{metric.name}_worst_region'] = metric.worst(region_metric_list)
-        # all_results_str += f"Worst-group {metric.name}: {all_results[f'{metric.name}_worst_region']:.3f}\n"
-        #
-        # return all_results, all_results_str

@@ -99,7 +99,11 @@ class CropYieldDataset(SustainBenchDataset):
         self.initialize_region_locs()
         self.metadata['loc1'] = [self.region1_to_loc1(reg) for reg in self.metadata['region1']]
         self.metadata['loc2'] = [self.region2_to_loc2(reg) for reg in self.metadata['region2']]
-        
+        usa = pickle.load(open(os.path.join(self._data_dir, "usa/usa.pkl"), "rb"))
+        argentina = pickle.load(open(os.path.join(self._data_dir, "argentina/argentina.pkl"), "rb"))
+        brazil = pickle.load(open(os.path.join(self._data_dir, "brazil/brazil.pkl"), "rb"))
+        self.location_map = {"usa": usa, "argentina": argentina, "brazil": brazil}
+
         self._y_array = self.metadata['y'].to_numpy()
         self._y_size = 1
         

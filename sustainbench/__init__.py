@@ -7,11 +7,11 @@ benchmark_datasets = [
     'fmow',
     'africa_crop_type_mapping',
     'crop_seg',
-    'education',
     'crop_type_kenya',
     'crop_yield',
     'land_cover_rep',
-    'brick_kiln'
+    'brick_kiln',
+    'dhs_dataset'
 ]
 
 additional_datasets = [

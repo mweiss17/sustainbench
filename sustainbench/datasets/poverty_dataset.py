@@ -183,12 +183,12 @@ class PovertyMapDataset(SustainBenchDataset):
         country_folds = SPLITS
 
         self._split_array = -1 * np.ones(len(self.metadata))
-
         incountry_folds_split = np.arange(len(self.metadata))
         # take the test countries to be ood
         idxs_id, idxs_ood_test = split_by_countries(incountry_folds_split, country_folds['test'], self.metadata)
         # also create a validation OOD set
         idxs_id, idxs_ood_val = split_by_countries(idxs_id, country_folds['val'], self.metadata)
+
         for split in ['test', 'val', 'id_test', 'id_val', 'train']:
             # keep ood for test, otherwise throw away ood data
             if split == 'test':

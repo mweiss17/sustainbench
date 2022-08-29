@@ -228,7 +228,7 @@ class CropTypeMappingDataset(SustainBenchDataset):
         Dates are returned as integers in format {Year}{Month}{Day}
         """
         loc_id = f'{self.y_array[idx]:06d}'
-        
+
         s1_json = json.loads(open(os.path.join(self.data_dir, self.country, 's1', f's1_{self.country}_{loc_id}.json'), 'r').read())
         s1 = self.get_dates(s1_json)
         
