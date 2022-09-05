@@ -148,6 +148,7 @@ class DHSDataset(SustainBenchDataset):
                  'size':     19_356_345}
             ]
         },
+        '1.1': {"download_url": None},
     }
 
     def __init__(self, version=None, root_dir='data', download=False,
@@ -156,6 +157,7 @@ class DHSDataset(SustainBenchDataset):
                  use_ood_val=True,
                  cache_size=100):
         self._version = version
+
         self._data_dir = self.initialize_data_dir(root_dir, download, data_dir="dhs_dataset_v1.1")
 
         self._split_dict = {'train': 0, 'id_val': 1, 'id_test': 2, 'val': 3, 'test': 4}

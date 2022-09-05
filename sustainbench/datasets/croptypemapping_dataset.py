@@ -198,9 +198,9 @@ class CropTypeMappingDataset(SustainBenchDataset):
             s2 = torch.cat((s2, torch.unsqueeze(ndvi_s2, 0), torch.unsqueeze(gcvi_s2, 0)), 0)
             planet = torch.cat((planet, torch.unsqueeze(ndvi_planet, 0), torch.unsqueeze(gcvi_planet, 0)), 0)
         
-        s1 = self.pad(s1)
-        s2 = self.pad(s2)
-        planet = self.pad(planet)
+        # s1 = self.pad(s1)
+        # s2 = self.pad(s2)
+        # planet = self.pad(planet)
 
         return {'s1': s1, 's2': s2, 'planet': planet}
     
