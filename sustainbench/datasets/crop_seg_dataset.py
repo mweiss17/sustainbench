@@ -103,7 +103,7 @@ class CropSegmentationDataset(SustainBenchDataset):
         mask_img = Image.open(path).convert('RGB')
         mask_img = torch.from_numpy(np.array(mask_img))
 
-        masks_filled_path = path.replace("masks", "masks_filled")
+        masks_filled_path = Path(str(path).replace("masks", "masks_filled"))
         masks_filled_img = Image.open(masks_filled_path).convert('RGB')
         masks_filled_img = torch.from_numpy(np.array(masks_filled_img))
         return mask_img, masks_filled_img
