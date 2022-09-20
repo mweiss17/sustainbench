@@ -47,7 +47,7 @@ class CropSegmentationDataset(SustainBenchDataset):
         }
     }
 
-    def __init__(self, version=None, root_dir='data', download=False, split_scheme='official', oracle_training_set=False, seed=111, filled_mask=False, use_ood_val=False):
+    def __init__(self, version=None, root_dir='data', download=False, split_scheme='official', oracle_training_set=False, seed=111, use_ood_val=False):
         self._version = version
         self._data_dir = self.initialize_data_dir(root_dir, download) 
 
@@ -62,7 +62,6 @@ class CropSegmentationDataset(SustainBenchDataset):
         self._original_resolution = (224, 224) #checked
         
         self.metadata = pd.read_csv(self.root / 'clean_data.csv')
-        self.filled_mask = filled_mask
 
         self._split_array = -1 * np.ones(len(self.metadata))
         for split in self._split_dict.keys():
@@ -78,24 +77,13 @@ class CropSegmentationDataset(SustainBenchDataset):
             self._split_array[id] = self._split_dict[split]
 
         self.full_idxs = self.metadata['indices']
-        if self.filled_mask:
-            self._y_array = np.asarray([self.root / 'masks_filled' / f'{y}.png' for y in self.full_idxs])
-        else:
-            self._y_array = np.asarray([self.root / 'masks' / f'{y}.png' for y in self.full_idxs])
+        self._y_array = np.asarray([self.root / 'masks' / f'{y}.png' for y in self.full_idxs])
 
         self._y_size = 1
         self.metadata.rename(columns={"ids": "y"}, inplace=True)
 
         self._metadata_fields = ['y', 'max_lat', 'max_lon', 'min_lat', 'min_lon']
         self._metadata_array = self.metadata[self._metadata_fields].to_numpy()
-        #torch.from_numpy(self.metadata[self._metadata_fields].to_numpy())
-
-        # self._eval_groupers = {
-        #     'max_lat': CombinatorialGrouper(dataset=self, groupby_fields=['max_lat']),
-        #     'max_lon': CombinatorialGrouper(dataset=self, groupby_fields=['max_lon']),
-        #     'min_lat': CombinatorialGrouper(dataset=self, groupby_fields=['min_lat']),
-        #     'min_lon': CombinatorialGrouper(dataset=self, groupby_fields=['min_lon']),
-        # }
 
         super().__init__(root_dir, download, split_scheme)
 
@@ -112,9 +100,13 @@ class CropSegmentationDataset(SustainBenchDataset):
         """
         Returns x for a given idx.
         """
-        img = Image.open(path).convert('RGB')
-        img = torch.from_numpy(np.array(img))
-        return img
+        mask_img = Image.open(path).convert('RGB')
+        mask_img = torch.from_numpy(np.array(mask_img))
+
+        masks_filled_path = path.replace("masks", "masks_filled")
+        masks_filled_img = Image.open(masks_filled_path).convert('RGB')
+        masks_filled_img = torch.from_numpy(np.array(masks_filled_img))
+        return mask_img, masks_filled_img
 
     def crop_segmentation_metrics(self, y_true, y_pred, binarized=True):
         y_true = y_true.flatten()
