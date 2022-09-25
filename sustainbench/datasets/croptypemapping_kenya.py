@@ -72,7 +72,7 @@ class CropTypeMappingKenyaDataset(SustainBenchDataset):
             'download_url': 'https://drive.google.com/drive/folders/1Rq1F-ys-rkjftAUnbdGJ1T6udsZWnEyo?usp=sharing',
             'compressed_size': None}}
 
-    def __init__(self, version=None, root_dir='data', download=False, test_set='random', training_set="random"):
+    def __init__(self, version=None, root_dir='data', download=False, test_set='random', training_set="Bungoma"):
         """
         Args:
             training_set: split data randomly, or set one region as the train/val set (ex training_set='Bungoma') and the other two as test.
